@@ -1,0 +1,394 @@
+package Gone4Combo;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.JTextField;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
+
+@SuppressWarnings("serial")
+public class FractalFrame extends JFrame{
+
+	private JPanel componentPanel, mandFractalPanel, mandlePanel, juilaFractalPanel, juilaPanel;
+	private JTextField selectedPoint;
+	private JLabel realPointMin, realPointMax, imagPointMax,  imagPointMin, iterationsLabal, pointOfSelect, labelCombo, generateLabel;
+	private JButton generatebutton, saveButton, loadButton, deleteButton;
+	private SpinnerModel realMaxSpin, realMinSpin, imagMaxSpin, imagMinSpin, iterationsSpin;
+	private JSpinner realMax, realMin, imagMax, imagMin, iterations;
+	protected String savePoint;
+	protected Mandelbrot mandbro;
+	protected JuliaSet juliaGal;
+	protected double userXPoint, userYPoint;
+	protected int currentIter;
+	private ComplexNumber pointToShow;
+	//Set of saved complex numbers
+	final Set<ComplexNumber> favourites = new HashSet<ComplexNumber>();
+	// Allows the user to sectect the saved Julia fractal they want to view
+	JComboBox<ComplexNumber> pointsSaved = new JComboBox<ComplexNumber>(favourites.toArray(new ComplexNumber[0]));
+
+	public static void main(String[] args) {
+		FractalFrame MandelFrame = new FractalFrame();
+		MandelFrame.setVisible(true);
+
+	}
+
+	public FractalFrame(){
+		super("Fractal Explorer");
+
+		// New instances of the Mandelbort and Julia Set classes
+		mandbro = new Mandelbrot();
+		juliaGal = new JuliaSet(this);
+
+		this.GUIManager();
+	}
+
+	public void GUIManager(){
+
+		// Starting size for the full GUI
+		setSize(new Dimension(1400,650));
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		Container mainPanel = this.getContentPane();
+
+		// Main panel that all other panels are added to
+		mainPanel.setLayout(new BorderLayout());
+		getContentPane().setBackground(Color.white);
+
+		// Panel that runs along the top edge of the GUI and holds the components
+		componentPanel = new JPanel();
+		componentPanel.setLayout(new GridBagLayout());
+		// Added to the main panel
+		mainPanel.add(componentPanel, BorderLayout.NORTH);
+
+		GridBagConstraints c = new GridBagConstraints();
+		c.fill = GridBagConstraints.HORIZONTAL;
+
+		realPointMin = new JLabel("Real Min: ");
+		c.weightx = 0.2;
+		c.gridx = 0;
+		c.gridy = 0;
+		componentPanel.add(realPointMin, c);
+
+		// Current value 2, minimum -2, maximum 2, step size 0.1
+		realMinSpin = new SpinnerNumberModel(mandbro.realAxisTo, mandbro.realAxisFrom, mandbro.realAxisTo, 0.1);
+		realMin = new JSpinner(realMinSpin);
+		c.weightx = 0.5;
+		c.gridx = 1;
+		c.gridy = 1;
+		componentPanel.add(realMin, c);
+
+		realPointMax = new JLabel("Real Max: ");
+		c.weightx = 0.2;
+		c.gridx = 0;
+		c.gridy = 1;
+		componentPanel.add(realPointMax, c);
+
+		// Current value -2, minimum -2, maximum 2, step size 0.1
+		realMaxSpin = new SpinnerNumberModel(mandbro.realAxisFrom, mandbro.realAxisFrom, mandbro.realAxisTo, 0.1);
+		realMax = new JSpinner(realMaxSpin);
+		c.ipady = 5;
+		c.gridx = 1;
+		c.gridy = 0;
+		componentPanel.add(realMax, c);
+
+		imagPointMin = new JLabel("Imaginary Min: ");
+		c.weightx = 0.5;
+		c.gridx = 2;
+		c.gridy = 0;
+		componentPanel.add(imagPointMin, c);
+
+		// Current value 1.6, minimum -1.6, maximum 1.6, step size 0.1
+		imagMinSpin = new SpinnerNumberModel(mandbro.imaginaryAxisFrom, mandbro.imaginaryAxisFrom, mandbro.imaginaryAxisTo, 0.1);
+		imagMin = new JSpinner(imagMinSpin);
+		c.weightx = 0.5;
+		c.gridx = 3;
+		c.gridy = 0;
+		componentPanel.add(imagMin, c);
+
+		imagPointMax = new JLabel("Imaginary Max: ");
+		c.weightx = 0.5;
+		c.gridx = 2;
+		c.gridy = 1;
+		componentPanel.add(imagPointMax, c);
+
+		// Current value -1.6, minimum -1.6, maximum 1.6, step size 0.1
+		imagMaxSpin = new SpinnerNumberModel(mandbro.imaginaryAxisTo, mandbro.imaginaryAxisFrom, mandbro.imaginaryAxisTo, 0.1);
+		imagMax = new JSpinner(imagMaxSpin);
+		c.weightx = 0.5;
+		c.gridx = 3;
+		c.gridy = 1;
+		componentPanel.add(imagMax, c);
+
+
+		iterationsLabal = new JLabel("Iteration no. : ");
+		c.weightx = 0.2;
+		c.gridx = 4;
+		c.gridy = 0;
+		componentPanel.add(iterationsLabal, c);
+
+		// Current value mandbro.iterations, minimum 0, maximum 5000, step size 1
+		iterationsSpin = new SpinnerNumberModel(mandbro.iterations, 0, 5000, 1);
+		iterations = new JSpinner(iterationsSpin);
+		c.weightx = 0.5;
+		c.gridx = 5;
+		c.gridy = 0;
+		componentPanel.add(iterations, c);
+
+		pointOfSelect = new JLabel("Selected Point: ");
+		c.weightx = 0.2;
+		c.gridx = 4;
+		c.gridy = 1;
+		componentPanel.add(pointOfSelect, c);
+
+		selectedPoint = new JTextField();
+		c.weightx = 0.5;
+		c.gridx = 5;
+		c.gridy = 1;
+		componentPanel.add(selectedPoint, c);
+
+		generateLabel = new JLabel("Update fractal: ");
+		c.weightx = 0.2;
+		c.gridx = 0;
+		c.gridy = 2;
+		componentPanel.add(generateLabel, c);
+
+		
+		// Refreshes after the JSpinner components are changed
+		generatebutton = new JButton("Generate");
+		c.weightx = 0.5;
+		c.gridx = 1;
+		c.gridy = 2;
+		componentPanel.add(generatebutton, c);
+
+		pointsSaved = new JComboBox();
+		c.weightx = 0.5;
+		c.gridx = 3;
+		c.gridy = 2;
+		componentPanel.add(pointsSaved, c);
+		pointsSaved.setVisible(false);
+
+		saveButton = new JButton("Save");
+		c.weightx = 0.5;
+		c.gridx = 2;
+		c.gridy = 2;
+		componentPanel.add(saveButton, c);
+		saveButton.setVisible(false);
+
+		saveButton.addActionListener(new ActionListener(){
+
+			public void actionPerformed(ActionEvent e) {
+
+				ComplexNumber thisToSave = new ComplexNumber(getUserXPoint(), getUserYPoint());
+				// Stops the same points being saved twice
+				for(ComplexNumber x : favourites) { 
+					if(x.equals(thisToSave)){}
+				}
+
+				favourites.add(thisToSave);
+				pointsSaved.addItem(thisToSave);
+				pointsSaved.setVisible(true);
+				loadButton.setVisible(true);
+				deleteButton.setVisible(true);
+
+			}
+
+		});
+		
+		loadButton = new JButton("Load");
+		c.weightx = 0.5;
+		c.gridx = 4;
+		c.gridy = 2;
+		componentPanel.add(loadButton, c);
+		loadButton.setVisible(false);
+
+		loadButton.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				ComplexNumber c = (ComplexNumber) pointsSaved.getSelectedItem();
+				userXPoint = c.getReal();
+				userYPoint = c.getImaginary();
+				juliaGal.repaint();
+			}
+		});
+
+	
+		deleteButton = new JButton("Delete");
+		c.weightx = 0.5;
+		c.gridx = 5;
+		c.gridy = 2;
+		componentPanel.add(deleteButton, c);
+		deleteButton.setVisible(false);
+		deleteButton.addActionListener(new ActionListener(){
+
+			public void actionPerformed(ActionEvent e) {
+				favourites.remove(pointsSaved.getSelectedItem());
+				pointsSaved.removeItem(pointsSaved.getSelectedItem());
+				if(favourites.size() == 0){
+					
+				}
+			}
+		});
+
+
+			mandFractalPanel = new JPanel();
+			mandFractalPanel.setPreferredSize(new Dimension(getWidth()/2, getHeight()));
+			mandFractalPanel.setLayout(new BorderLayout());
+			mainPanel.add(mandFractalPanel, BorderLayout.WEST);
+
+			mandlePanel = new JPanel();
+			mandlePanel.setLayout(new BorderLayout());
+			mandFractalPanel.add(mandlePanel);
+
+			juilaFractalPanel = new JPanel();
+			juilaFractalPanel.setPreferredSize(new Dimension(getWidth()/2, getHeight()));
+			juilaFractalPanel.setLayout(new BorderLayout());
+			mainPanel.add(juilaFractalPanel, BorderLayout.EAST);
+
+			juilaPanel = new JPanel();
+			juilaPanel.setLayout(new BorderLayout());
+			juilaFractalPanel.add(juilaPanel);
+
+			//Menu forFavs = new Menu(getUserYPoint(), getUserXPoint(),this);
+			//this.setJMenuBar(forFavs.createMenuBar());
+
+			this.addContent();
+		}
+
+		public void addContent(){
+
+			generatebutton.addActionListener(new componentSetter());
+
+			mandlePanel.add(mandbro, BorderLayout.CENTER);
+			mandlePanel.addMouseListener(new SelectedPointListener(selectedPoint));
+
+			juilaPanel.add(juliaGal, BorderLayout.CENTER);
+			juilaPanel.setVisible(false);
+
+			mandbro.draw();
+			mandbro.repaint();
+
+			juliaGal.draw();
+			juliaGal.repaint();
+
+
+		} 
+
+		public double getUserXPoint() {
+			return userXPoint;
+		}
+
+		public double getUserYPoint() {
+			return userYPoint;
+		}
+
+		public int getCurrntIter(){
+			return currentIter;
+		}
+
+		public String pointToSave(){
+			return savePoint;
+		}
+
+		class SelectedPointListener implements MouseListener {
+
+			private JTextField selectedPoint;
+			double realAxisFrom = -2;
+			double realAxisTo = 2;
+			double imaginaryAxisFrom = -1.6;
+			double imaginaryAxisTo = 1.6;
+			double xStep = (realAxisTo - realAxisFrom) / (double) getWidth() * 2; // FOR THE LOVE OF GOD CHANGE THE  '* 2'
+			double yStep = (imaginaryAxisTo - imaginaryAxisFrom) / (double) getHeight();
+
+			Mandelbrot mandelForMouse = new Mandelbrot();
+
+
+			public SelectedPointListener(JTextField selectedPoint){
+				this.selectedPoint = selectedPoint;
+			}
+
+			/*  Implement an event listener which handles the user click on a
+			 *  point of the Mandelbrot display panel and responds by displaying the
+			 *  Complex number represented by this point in a suitable GUI component. + 
+			 *  Let's call this complex number the user selected point.*/
+
+			public void mouseClicked(MouseEvent e) {
+				juilaPanel.setVisible(true);
+				saveButton.setVisible(true);
+
+				pointToShow = (new ComplexNumber(realAxisFrom + e.getX() * xStep, imaginaryAxisFrom + e.getY() * yStep));
+
+				DecimalFormat deFormat = new DecimalFormat("#.###");
+				selectedPoint.setText(deFormat.format(pointToShow.getReal()) + ", " + deFormat.format(pointToShow.getImaginary()) + "i");
+
+				userXPoint = pointToShow.getReal();
+				userYPoint = pointToShow.getImaginary();
+				currentIter = mandbro.getIterations();
+
+				savePoint = userXPoint + ", " + userYPoint + ", " +currentIter;
+				System.out.println(userXPoint + ", " + userYPoint + ", " +currentIter);
+
+				juliaGal.draw();
+				juliaGal.repaint();
+			}
+
+			public void mouseEntered(MouseEvent arg0) {}
+			public void mouseExited(MouseEvent arg0) {}
+			public void mousePressed(MouseEvent arg0) {}
+			public void mouseReleased(MouseEvent arg0) {}
+		}
+
+		class componentSetter implements ActionListener {
+
+			public void actionPerformed(ActionEvent e) {
+
+				mandbro.setIterations((Integer)iterationsSpin.getValue());
+				juliaGal.setIterations((Integer)iterationsSpin.getValue());
+
+				mandbro.setrealAxisFrom((Double)realMaxSpin.getValue());
+				mandbro.setrealAxisTo((Double)realMinSpin.getValue());
+				mandbro.setimaginaryAxisFrom((Double)imagMaxSpin.getValue());
+				mandbro.setimaginaryAxisTo((Double)imagMinSpin.getValue());
+
+				mandbro.repaint();
+				juliaGal.repaint();
+			}
+
+		}
+
+		class SaveListener implements ActionListener {
+
+			public void actionPerformed(ActionEvent e) {
+				labelCombo.setVisible(true);
+				pointsSaved.setVisible(true);
+
+				//getSaveParts is the real and imagnary point the users chose and the iteration it was on
+				//JMenu newSave = new JMenu(window.getSaveParts());
+				//loadFrac.add(newSave);
+				//newSave.add(actLoad);
+				//newSave.add(delete);
+
+			}
+		}
+	}
+
+

@@ -1,0 +1,79 @@
+package Gone4Combo;
+
+import java.awt.Color;
+import java.awt.Graphics;
+
+import javax.swing.JPanel;
+
+@SuppressWarnings("serial")
+public class JuliaSet extends JPanel {
+
+	protected double realAxisFrom = -2;
+	protected double realAxisTo = 2;
+	protected double imaginaryAxisFrom = -1.6;
+	protected double imaginaryAxisTo = 1.6;
+
+	protected int iterations = 100;
+	private boolean draw = false;
+
+	protected ComplexNumber pointToShow;
+	protected FractalFrame window;
+
+	public void paintComponent(Graphics g) {
+		if (draw){
+			int width = getWidth();
+			int height = getHeight();
+
+			double xStep = (realAxisTo - realAxisFrom) / (double) width;
+			double yStep = (imaginaryAxisTo - imaginaryAxisFrom) / (double) height;
+
+			for (int i = 0; i < width; i++){
+				for(int j = 0; j < height; j++){
+					//int sequence = getIterations(new ComplexNumber(window.getUserXPoint(), window.getUserYPoint()));
+					int sequence = getIterations(new ComplexNumber(realAxisFrom + i * xStep, imaginaryAxisFrom + j * yStep));
+
+					g.setColor(sequence == iterations ? Color.BLACK : Color.getHSBColor(0.5f + sequence/(float)iterations, 1f, 1f));
+					g.fillRect(i, j, 1, 1);
+				}
+			}
+		}
+	}
+
+	public int getIterations(ComplexNumber d){
+		ComplexNumber c = new ComplexNumber(window.getUserXPoint(), window.getUserYPoint());
+		int sequence;
+		for(sequence = 0; sequence < iterations; sequence++){
+			if (d.modulusSquared() > 4){
+				break;
+			}
+			d = d.square().add(c);
+		}
+		return sequence;
+	}
+
+	public void draw(){
+		draw = true;
+	}
+	
+	public void setIterations(int iterations){
+		this.iterations = iterations;
+	}
+	
+	public JuliaSet(FractalFrame window) {
+		this.window = window;
+	}
+	
+	public void updateUserXY(ComplexNumber pointToShow){
+		this.pointToShow = pointToShow;
+	}
+}
+
+/* Extend your GUI application with a display for the Julia Set corresponding to the user selected point. 
+ * For this extra display, fix the portion of the complex plane represented to be the
+ * recommended default from Part Two that is: numbers with Real values between -2 to 2 and Imaginary values between -1.6 to 1.6.
+ * Draw the Julia Set corresponding to the user selected point in this extra display.
+ * At this point your whole GUI should display, a main display showing a portion of the Mandelbrot Set,
+ * text fields with data on which portion of the complex plane is being viewed in the main display, 
+ * the user selected point (if one has been selected) and another display showing the Julia Set for the user selected point 
+ * (if one has been selected). */
+
