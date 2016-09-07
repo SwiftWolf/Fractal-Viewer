@@ -25,8 +25,7 @@ import javax.swing.JTextField;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 
-/* I have completed parts 1 - 6 and part of 7, I have extended my fractal explorer with the the Burning Ship fractal 
- * and have implemented the ability to toggle live updates of the Juila Set when the mouse is dragged over the main fractal (Mandelbrot or Burning Ship).
+/* I have implemented the ability to toggle live updates of the Juila Set when the mouse is dragged over the main fractal (Mandelbrot or Burning Ship).
  * When any changes are made to the text fields or the Burning Ship toggle is switched the Generate button must be clicked to see the updates/changes.
  * Creating and tracking of the Juila Set are done with the left mouse button, zooming is done with the right mouse button.
  * */
